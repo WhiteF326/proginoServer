@@ -1,0 +1,154 @@
+<html>
+
+<head>
+    <title>progino</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/destyle.css/destyle.css" type="text/css">
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+</head>
+
+<script>
+    window.onload = async () => {
+        // get courses list
+        const courses = await fetch(
+            "/courses",
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+        // get accessed course info
+        const courseName = await (await fetch(
+            "/accessed/course",
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "plain/text"
+                }
+            }
+        )).text();
+
+        const courseInfo = JSON.parse(JSON.parse(await courses.text()));
+        const selectedCourse = courseInfo.find(
+            course => course.course === courseName
+        );
+
+        // get user's progress
+        const progress = await fetch(
+            `/progress`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+        const progressList = JSON.parse(JSON.parse(await progress.text()));
+
+        // set course title
+        const courseTitle = document.getElementById("courseTitle");
+        courseTitle.innerText = selectedCourse.name;
+
+        // set problem count
+        const problemCount = document.getElementById("problemCount");
+        problemCount.innerText = selectedCourse.problems.length;
+
+        // set uncleared problem count
+        const unclearedProblemCount = document.getElementById("unclearCount");
+        const unclearedProblems = progressList[courseName];
+        const unclearedProblemCountValue
+            = selectedCourse.problems.length - progressList[courseName].length;
+        unclearedProblemCount.innerText = unclearedProblemCountValue;
+
+        // set cleared rate (percentage)
+        const clearedRate = document.getElementById("clearRate");
+        const clearedRateValue = Math.round(
+            (progressList[courseName].length / selectedCourse.problems.length) * 100
+        );
+        clearedRate.innerText = `${clearedRateValue}%`;
+
+        // create problems list
+        const problemsList = document.getElementById("problemsList");
+        selectedCourse.problems.forEach(async problem => {
+            // get problem info
+            const problemInfo = JSON.parse(JSON.parse(
+                await (await fetch(
+                    `/problem/${problem}/raw`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    }
+                )).text()
+            ));
+            // create problem row
+            const problemRow = document.createElement("tr");
+            // create problem number cell
+            const problemNumber = document.createElement("td");
+            problemNumber.innerText = problem;
+            problemRow.appendChild(problemNumber);
+            // create problem link with problem name
+            const problemLink = document.createElement("a");
+            problemLink.innerText = problemInfo.title;
+            problemLink.href = `/problem/${problem}`;
+            // create problem name cell
+            const problemName = document.createElement("td");
+            problemName.appendChild(problemLink);
+            problemRow.appendChild(problemName);
+            // create problem status cell
+            const problemStatus = document.createElement("td");
+            problemStatus.innerText = progressList[courseName].includes(problem)
+                ? "クリア"
+                : "未クリア";
+            problemRow.appendChild(problemStatus);
+            // append problem row to problems list
+            problemsList.appendChild(problemRow);
+        });
+    }
+</script>
+
+<body>
+    <header>
+        <h1>
+            progino
+        </h1>
+        <p>
+            study for "using".
+        </p>
+    </header>
+    <h2 id="courseTitle"></h2>
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    問題数
+                </th>
+                <th>
+                    未クリア問題
+                </th>
+                <th>
+                    クリア率
+                </th>
+            </tr>
+            <tr>
+                <td id="problemCount"></td>
+                <td id="unclearCount"></td>
+                <td id="clearRate"></td>
+            </tr>
+        </thead>
+    </table>
+    <hr style="margin: 10px">
+    <table>
+        <thead id="problemsList">
+            <tr>
+                <th>問題番号</th>
+                <th>問題名</th>
+                <th>提出状況</th>
+            </tr>
+        </thead>
+    </table>
+</body>
+
+</html>

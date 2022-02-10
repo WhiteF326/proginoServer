@@ -1,0 +1,102 @@
+<html>
+
+<head>
+    <title>progino</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/destyle.css/destyle.css" type="text/css">
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+</head>
+
+<script>
+    window.onload = async () => {
+        // get courses list
+        const courses = await fetch(
+            "/courses",
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        /*
+        input : {
+            "course": "course id",
+            "name": "course name",
+            "level": course level,
+            "problems": [
+                problem id,
+                problem id,
+                ...
+            ]
+        }
+        */
+
+        // courses viewer
+        const courseView = document.getElementById("mainContents");
+        const coursesList = JSON.parse(JSON.parse(await courses.text()));
+
+        coursesList.forEach(course => {
+            const courseRow = document.createElement("tr");
+            // create course link
+            const courseLink = document.createElement("a");
+            courseLink.href = `/course/${course.course}`;
+            courseLink.innerText = course.name;
+            // create course name cell
+            const courseName = document.createElement("td");
+            courseName.appendChild(courseLink);
+            courseRow.appendChild(courseName);
+            // create course level cell
+            const courseLevel = document.createElement("td");
+            courseLevel.innerText = course.level;
+            courseRow.appendChild(courseLevel);
+            // append course row to course view
+            courseView.appendChild(courseRow);
+        });
+    }
+</script>
+
+<body>
+    <header>
+        <h1>
+            progino
+        </h1>
+        <p>
+            study for "using".
+        </p>
+    </header>
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    <h2>
+                        メインコンテンツ
+                    </h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    コース名
+                                </th>
+                                <th>
+                                    レベル
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="mainContents">
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td id="subContents">
+                    <h2>
+                        サブコンテンツ
+                    </h2>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>

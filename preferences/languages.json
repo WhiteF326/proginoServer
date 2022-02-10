@@ -1,0 +1,10 @@
+{
+  "python": {
+    "displayName": "Python 3.10.2",
+    "command": ["python", 0]
+  },
+  "go": {
+    "displayName": "go 1.17.1",
+    "command": ["go", 0]
+  }
+}

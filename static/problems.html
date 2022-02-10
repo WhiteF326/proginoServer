@@ -1,0 +1,123 @@
+<html>
+
+<head>
+    <title>progino</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/destyle.css/destyle.css" type="text/css">
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    <!-- submission code font -->
+    <link href="https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c" rel="stylesheet">
+</head>
+
+<script>
+    window.onload = async () => {
+        // get accessed problem number
+        const accessedProblemNumber = await (await fetch(
+            "/accessed/problem",
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "plain/text"
+                }
+            }
+        )).text();
+
+        // get accessed problem info
+        const problemInfo = JSON.parse(JSON.parse(await (await fetch(
+            `/problem/${accessedProblemNumber}/raw`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        )).text()));
+
+        // get accessed problem body
+        const problemBody = await (await fetch(
+            `/problem/${accessedProblemNumber}/body`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        )).text();
+
+        // get user's progress
+        const progress = await fetch(
+            `/progress`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+        const progressList = JSON.parse(JSON.parse(await progress.text()));
+
+        // set problem title
+        const problemTitle = document.getElementById("problemTitle");
+        problemTitle.innerText
+            = accessedProblemNumber + " - " + problemInfo.title;
+
+        // set execution time limit
+        const timeLimit = document.getElementById("executionTimeLimit");
+        // fix ms to s
+        timeLimit.innerText = problemInfo.limits.time / 1000 + "s";
+
+        // set memory limit
+        const memoryLimit = document.getElementById("memoryLimit");
+        // fix byte to MB
+        memoryLimit.innerText = problemInfo.limits.memory / 1024 + "MB";
+
+        // set problem body
+        const problemBodyElement = document.getElementById("problemBody");
+        problemBodyElement.innerHTML = problemBody;
+
+        // on change in code input, change the height of the code block
+        const codeInput = document.getElementById("submitCode");
+        codeInput.oninput = () => {
+            codeInput.style.height = codeInput.scrollHeight + "px";
+        };
+    }
+</script>
+
+<style>
+    #submitCode {
+        font-family: "M PLUS Rounded 1c";
+        font-size: 0.7em;
+    }
+</style>
+
+<body>
+    <header>
+        <h1>
+            progino
+        </h1>
+        <p>
+            study for "using".
+        </p>
+    </header>
+    <h2 id="problemTitle"></h2>
+    <table>
+        <thead>
+            <tr>
+                <th>実行時間</th>
+                <th>メモリ</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="executionTimeLimit"></td>
+                <td id="memoryLimit"></td>
+            </tr>
+        </tbody>
+    </table>
+    <div id="problemBody"></div>
+    <hr>
+    <h3>提出</h3>
+    <textarea id="submitCode"></textarea>
+    <button id="submitButton">提出</button>
+</body>
+
+</html>

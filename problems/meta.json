@@ -1,0 +1,11 @@
+[
+  {
+    "course": "newbie",
+    "name": "初歩を学ぶ",
+    "level": 1,
+    "problems": [
+      1,
+      2
+    ]
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "title": "Hello World",
+  "testcases": [
+    {
+      "input": "./in/noinput.txt",
+      "output": "./out/output.txt"
+    }
+  ],
+  "limits": {
+    "time": 2000,
+    "memory": 1048576
+  }
+}
