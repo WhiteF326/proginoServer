@@ -1,5 +1,9 @@
 {
   "[html]": {
     "editor.tabSize": 4
+  },
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.rulers": [80]
   }
 }

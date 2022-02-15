@@ -1,4 +1,4 @@
-<html>
+<html lang="ja">
 
 <head>
     <title>progino</title>
@@ -6,10 +6,19 @@
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
     <!-- submission code font -->
     <link href="https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c" rel="stylesheet">
+    <!-- mathjax -->
+    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 </head>
 
 <script>
     window.onload = async () => {
+        // set start mark of mathjax as $
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        });
+
         // get accessed problem number
         const accessedProblemNumber = await (await fetch(
             "/accessed/problem",
@@ -55,6 +64,19 @@
         );
         const progressList = JSON.parse(JSON.parse(await progress.text()));
 
+        // get language list
+        const languageList = await fetch(
+            "/languages",
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+        const languageListValue
+            = JSON.parse(JSON.parse(await languageList.text()));
+
         // set problem title
         const problemTitle = document.getElementById("problemTitle");
         problemTitle.innerText
@@ -73,12 +95,62 @@
         // set problem body
         const problemBodyElement = document.getElementById("problemBody");
         problemBodyElement.innerHTML = problemBody;
+        // apply mathjax to problem body
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, problemBodyElement]);
+
+        // set language select
+        const languageListBox = document.getElementById("language");
+        console.log(languageListValue)
+        Object.keys(languageListValue).forEach(language => {
+            // make new option
+            const option = document.createElement("option");
+            option.value = language;
+            option.innerText = languageListValue[language].displayName;
+
+            // append option
+            languageListBox.appendChild(option);
+        });
 
         // on change in code input, change the height of the code block
         const codeInput = document.getElementById("submitCode");
         codeInput.oninput = () => {
             codeInput.style.height = codeInput.scrollHeight + "px";
         };
+
+        // submission
+        const submitButton = document.getElementById("submitButton");
+        // on click, submit code
+        submitButton.onclick = async () => {
+            /*
+            class Submit(BaseModel):
+                language: str
+                code: str
+                problem: int
+            */
+            const submit = {
+                language: languageListBox.value,
+                code: codeInput.value,
+                problem: String(accessedProblemNumber)
+            };
+            const nextSubmissionId = await fetch(
+                "/submit",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(submit)
+                }
+            );
+            // const nextSubmissionIdValue
+            // = JSON.parse(await nextSubmissionId.text());
+            // console.log(nextSubmissionIdValue);
+            const nextSubmissionIdValue = Number(await nextSubmissionId.text());
+            console.log(nextSubmissionIdValue);
+
+            // redirect to submission page
+            window.location.href = `/submission/${nextSubmissionIdValue}`;
+        }
     }
 </script>
 
@@ -91,7 +163,7 @@
 
 <body>
     <header>
-        <h1>
+        <h1 onclick="location.href='/'">
             progino
         </h1>
         <p>
@@ -116,6 +188,9 @@
     <div id="problemBody"></div>
     <hr>
     <h3>提出</h3>
+    <select id="language">
+        <!-- auto-generate by javascript -->
+    </select><br>
     <textarea id="submitCode"></textarea>
     <button id="submitButton">提出</button>
 </body>

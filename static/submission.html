@@ -1,0 +1,202 @@
+<html lang="ja">
+
+<head>
+    <title>progino</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/destyle.css/destyle.css" type="text/css">
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    <!-- submission code font -->
+    <link href="https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c" rel="stylesheet">
+</head>
+
+<script>
+    window.onload = async () => {
+        // get accessed submission number
+        const accessedSubmissionNumber = await (await fetch(
+            "/accessed/submission",
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "plain/text"
+                }
+            }
+        )).text();
+
+        // set submission number
+        document.getElementById("submissionTitle").innerText
+            += String(accessedSubmissionNumber);
+
+        // get full problems info for getting tried problem info
+        const problemInfo = JSON.parse(await (await fetch(
+            `/problems/list`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        )).text());
+
+        // get language list
+        const languageList = await fetch(
+            "/languages",
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+        const languageListValue
+            = JSON.parse(JSON.parse(await languageList.text()));
+
+        // main loop
+        const refresh = async () => {
+            // get submission status
+            const status = JSON.parse(await (await fetch(
+                `/submission/${accessedSubmissionNumber}/full`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "plain/text"
+                    }
+                }
+            )).text());
+
+            // set code
+            const submissionCode = document.getElementById("code");
+            submissionCode.innerHTML = status.code;
+
+            // lines
+            const lines = status.code.split("\n").length;
+            const lineCount = document.getElementById("lineCount");
+            lineCount.innerHTML = "";
+            for (let i = 0; i < lines; i++) {
+                lineCount.innerHTML += `${i + 1}\n`;
+            }
+
+            // set submission date
+            document.getElementById("submissionDate").innerText
+                = status.datetime;
+
+            // set problem info
+            document.getElementById("problemTitle").innerText
+                = problemInfo[status.problem].title;
+
+            // set language
+            document.getElementById("language").innerText
+                = languageListValue[status.language].displayName;
+
+            // set status
+            document.getElementById("verdict").innerText
+                = status.verdict;
+
+            // set score
+            document.getElementById("score").innerText
+                = status.verdict === "AC" ? "100" : "0";
+
+            // proceeding or exit
+            if (status.judge !== "end") {
+                // proceed judge
+                console.log(await (await fetch(
+                    `/judge/${accessedSubmissionNumber}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "plain/text"
+                        }
+                    }
+                )).text());
+                // call again
+                setTimeout(refresh, 1000);
+            }
+
+            console.log(status);
+        }
+        refresh();
+    }
+</script>
+
+<style>
+    #submitCode {
+        font-family: "M PLUS Rounded 1c";
+        font-size: 0.7em;
+    }
+
+    #codePlace {
+        min-height: 300px;
+        max-height: 300px;
+        overflow-y: scroll;
+    }
+
+    #codeCell {
+        width: 100%;
+    }
+
+    #code,
+    #lineCount {
+        margin: 0;
+        padding: 0;
+        line-height: 1.1em;
+    }
+
+    #lineCountCell {
+        padding-right: 0;
+        margin: 0;
+    }
+
+    #lineCount {
+        width: fit-content;
+    }
+</style>
+
+<body>
+    <header>
+        <h1 onclick="location.href='/'">
+            progino
+        </h1>
+        <p>
+            study for "using".
+        </p>
+    </header>
+    <h2 id="submissionTitle">提出 ID= </h2>
+    <hr>
+    <div id="codePlace">
+        <table style="width: unset;">
+            <tbody>
+                <td id="lineCountCell">
+                    <pre id="lineCount"></pre>
+                </td>
+                <td id="codeCell">
+                    <pre id="code"></pre>
+                </td>
+            </tbody>
+        </table>
+    </div>
+    <hr>
+    <table>
+        <tbody>
+            <tr>
+                <th>提出日時</th>
+                <td id="submissionDate"></td>
+            </tr>
+            <tr>
+                <th>問題</th>
+                <td id="problemTitle"></td>
+            </tr>
+            <tr>
+                <th>言語</th>
+                <td id="language"></td>
+            </tr>
+            <tr>
+                <th>結果</th>
+                <td id="verdict"></td>
+            </tr>
+            <tr>
+                <th>点数</th>
+                <td id="score"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>

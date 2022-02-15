@@ -1,10 +1,12 @@
 {
   "python": {
     "displayName": "Python 3.10.2",
-    "command": ["python", 0]
+    "command": ["python", 0],
+    "extension": "py"
   },
   "go": {
     "displayName": "go 1.17.1",
-    "command": ["go", 0]
+    "command": ["go", 0],
+    "extension": "go"
   }
 }
