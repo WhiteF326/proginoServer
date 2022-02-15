@@ -347,7 +347,7 @@ async def judge(submissionId: str, backgroundTasks: BackgroundTasks):
                     )
                 )
                 course = [elm["course"] for elm in course if int(submission["problem"]) in elm["problems"]][0]
-                if not submission["problem"] in user[course]:
+                if not int(submission["problem"]) in user[course]:
                     user[course].append(int(submission["problem"]))
                 g = open("./status/status.json", "w", encoding="utf-8")
                 g.write(json.dumps(user))
