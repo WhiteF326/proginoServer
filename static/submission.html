@@ -97,15 +97,30 @@
             // proceeding or exit
             if (status.judge !== "end") {
                 // proceed judge
-                console.log(await (await fetch(
-                    `/judge/${accessedSubmissionNumber}`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "plain/text"
+                const currentJudgeStatus = JSON.parse(JSON.parse(
+                    await (await fetch(
+                        `/judge/${accessedSubmissionNumber}`,
+                        {
+                            method: "GET",
+                            headers: {
+                                "Content-Type": "plain/text"
+                            }
                         }
-                    }
-                )).text());
+                    )).text()
+                ));
+                console.log(currentJudgeStatus);
+                // if judge status is WJ, change verdict
+                if (currentJudgeStatus.status === "WJ") {
+                    document.getElementById("verdict").innerText
+                        = "WJ "
+                        + currentJudgeStatus.doneTestCount
+                        + "/"
+                        + currentJudgeStatus.totalTestCount;
+                } else {
+                    // if judge status is not WJ, change verdict
+                    document.getElementById("verdict").innerText
+                        = currentJudgeStatus.status;
+                }
                 // call again
                 setTimeout(refresh, 1000);
             }

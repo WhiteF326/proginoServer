@@ -1,0 +1,1 @@
+- ユーザ情報は localStorage.userName と localStorage.expire

@@ -1,3 +1,4 @@
+import hashlib
 import subprocess
 from datetime import datetime
 from glob import glob
@@ -5,6 +6,7 @@ import os
 import uuid
 from threading import Timer
 from typing import Dict
+from typing import Optional
 from fastapi import BackgroundTasks, FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.responses import JSONResponse
@@ -69,6 +71,12 @@ class JudgeJob():
             jobs[self.UUID].status = "RE"
 
 jobs: Dict[str, JudgeInfo] = {}
+
+class User(BaseModel):
+    username: Optional[str]
+    password: Optional[str]
+    salt: Optional[str]
+    email: Optional[str]
 
 
 # main page
@@ -289,7 +297,13 @@ async def judge(submissionId: str, backgroundTasks: BackgroundTasks):
         submissions[submissionId] = submission
         f.write(json.dumps(submissions))
         f.close()
-        return json.dumps(len(jobs))
+        return json.dumps(
+            {
+                "status": "WJ",
+                "doneTestCount": 0,
+                "totalTestCount": len(problem["testcases"]),
+            }
+        )
     elif submission["judge"] == "wait":
         judges = []
         for judgeUUID in submission["judgeUUIDs"]:
@@ -299,7 +313,14 @@ async def judge(submissionId: str, backgroundTasks: BackgroundTasks):
                 judges.append("IE")
         # if there is any judge such that has a verdict of "WJ", return "WJ"
         if "WJ" in judges:
-            result = "WJ"
+            doneTestCount = len(judges) - judges.count("WJ")
+            return json.dumps(
+                {
+                    "status": "WJ",
+                    "doneTestCount": doneTestCount,
+                    "totalTestCount": len(judges)
+                }
+            )
         # if there is any judge such that has a verdict of "RJ", return "RJ"
         elif "RJ" in judges:
             result = "RJ"
@@ -362,3 +383,22 @@ async def judge(submissionId: str, backgroundTasks: BackgroundTasks):
             f.close()
 
             return json.dumps({"status": result})
+
+# search user
+@app.post("/searchUser", status_code=200, response_class=JSONResponse)
+def searchUser(user: User):
+    users = json.loads(
+        "".join(
+            open("./status/status.json", "r", encoding="utf-8")
+            .readlines()
+        )
+    )
+    users = [elm for elm in users if elm["username"] == user["username"]]
+    if len(user) == 0:
+        return json.dumps({"status": "not found"})
+    else:
+        passAndSalt = user["password"] + users[0]["salt"]
+        if users[0]["password"] == hashlib.sha256(user["password"].encode("utf-8")).hexdigest():
+            return json.dumps({"status": "found", "user": users[0]})
+        else:
+            return json.dumps({"status": "invalid password"})
