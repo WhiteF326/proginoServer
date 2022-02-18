@@ -6,6 +6,8 @@ authors = ["WhiteF326 <Lume1a326.leno@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9.6"
+fastapi = {extras = ["all"], version = "^0.74.0"}
+Markdown = "^3.3.6"
 
 [tool.poetry.dev-dependencies]
 
