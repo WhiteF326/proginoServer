@@ -23,12 +23,14 @@ session = {}
 
 md = markdown.Markdown()
 
+
 class Submit(BaseModel):
     language: str
     code: str
     problem: str
 
-class JudgeInfo():
+
+class JudgeInfo:
     language: str
     problem: str
     submissionId: str
@@ -44,25 +46,30 @@ class JudgeInfo():
     output: str
     error: str
 
-class JudgeJob():
+
+class JudgeJob:
     UUID: str
+
     def __init__(self, UUID: str):
         self.UUID = UUID
+
     def __call__(self):
         # make process
         jobs[self.UUID].process = subprocess.run(
             jobs[self.UUID].runCommand,
             capture_output=True,
             text=True,
-            stdin=open("./problems/" + jobs[self.UUID].problem + "/" + jobs[self.UUID].testcaseName["input"], "r", encoding="utf-8"),
+            stdin=open(
+                "./problems/" + jobs[self.UUID].problem + "/" + jobs[self.UUID].testcaseName["input"], "r", encoding="utf-8"),
         )
         # get status code
         statusCode = jobs[self.UUID].process.returncode
         if statusCode == 0:
             jobs[self.UUID].output = jobs[self.UUID].process.stdout
             jobs[self.UUID].error = jobs[self.UUID].process.stderr
-            
-            outputFile = open("./problems/" + jobs[self.UUID].problem + "/" + jobs[self.UUID].testcaseName["output"], "r", encoding="utf-8")
+
+            outputFile = open(
+                "./problems/" + jobs[self.UUID].problem + "/" + jobs[self.UUID].testcaseName["output"], "r", encoding="utf-8")
             if jobs[self.UUID].output == outputFile.read():
                 jobs[self.UUID].status = "AC"
             else:
@@ -70,7 +77,9 @@ class JudgeJob():
         else:
             jobs[self.UUID].status = "RE"
 
+
 jobs: Dict[str, JudgeInfo] = {}
+
 
 class User(BaseModel):
     username: Optional[str]
@@ -85,6 +94,7 @@ async def root():
     f = open("./static/front.html", "r", encoding="utf-8")
     return f.read()
 
+
 # course page
 @app.get("/course/{courseName}", response_class=HTMLResponse, status_code=200)
 async def course(courseName: str):
@@ -92,11 +102,13 @@ async def course(courseName: str):
     session["courseName"] = courseName
     return f.read()
 
+
 # get courses info
 @app.get("/courses", response_class=JSONResponse, status_code=200)
 async def getProblems():
     f = open("./problems/meta.json", "r", encoding="utf-8")
     return "".join(f.readlines())
+
 
 # get problems info
 @app.get("/problem/{problemId}", response_class=HTMLResponse, status_code=200)
@@ -104,6 +116,7 @@ async def getProblem(problemId: str):
     f = open("./static/problems.html", "r", encoding="utf-8")
     session["problemId"] = problemId
     return "".join(f.readlines())
+
 
 # get submission page
 @app.get(
@@ -116,6 +129,7 @@ async def getSubmission(submissionId: str):
     session["submissionId"] = submissionId
     return "".join(f.readlines())
 
+
 # get course info that accessed
 @app.get("/accessed/course", response_class=PlainTextResponse, status_code=200)
 async def getAccessed():
@@ -124,6 +138,7 @@ async def getAccessed():
     else:
         return "null"
 
+
 # get problem info that accessed
 @app.get("/accessed/problem", response_class=PlainTextResponse, status_code=200)
 async def getAccessed():
@@ -131,6 +146,7 @@ async def getAccessed():
         return session["problemId"]
     else:
         return "null"
+
 
 # get submission info that accessed
 @app.get(
@@ -144,11 +160,13 @@ async def getAccessed():
     else:
         return "null"
 
+
 # get languages list
 @app.get("/languages", response_class=JSONResponse, status_code=200)
 async def getLanguages():
     f = open("./preferences/languages.json", "r", encoding="utf-8")
     return "".join(f.readlines())
+
 
 # get problem info from id
 @app.get(
@@ -160,6 +178,7 @@ async def getProblem(problemId: str):
     f = open("./problems/" + problemId + "/" + problemId + ".json", "r", encoding="utf-8")
     return "".join(f.readlines())
 
+
 # get problems body
 @app.get(
     "/problem/{problemId}/body",
@@ -170,24 +189,26 @@ async def getProblemBody(problemId: str):
     f = open("./problems/" + problemId + "/problem.md", "r", encoding="utf-8")
     return md.convert("".join(f.readlines()))
 
+
 # get user's progress
 @app.get("/progress", response_class=JSONResponse, status_code=200)
 async def getProgress():
     f = open("./status/status.json", "r", encoding="utf-8")
     return "".join(f.readlines())
 
+
 # submit code
 @app.post("/submit", response_class=PlainTextResponse, status_code=200)
-async def submit(submit: Submit):
+async def submit(submitInfo: Submit):
     f = open("./submissions/submissions.json", "r", encoding="utf-8")
     # parse f as json
     submissions = json.loads("".join(f.readlines()))
     f.close()
     submissionId = len(submissions) + 1
     submissions[str(submissionId)] = {
-        "language": submit.language,
-        "code": submit.code,
-        "problem": submit.problem,
+        "language": submitInfo.language,
+        "code": submitInfo.code,
+        "problem": submitInfo.problem,
         "verdict": "WJ",
         "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "progress": "0",
@@ -197,6 +218,7 @@ async def submit(submit: Submit):
     f.write(json.dumps(submissions))
     f.close()
     return str(submissionId)
+
 
 # get submission info
 @app.get(
@@ -214,6 +236,7 @@ async def getSubmission(submissionId: str):
     else:
         return "null"
 
+
 # get full problems list
 @app.get("/problems/list", response_class=JSONResponse, status_code=200)
 async def getProblems():
@@ -225,6 +248,7 @@ async def getProblems():
             "".join(f.readlines())
         )
     return problems
+
 
 # proceed judge
 @app.get(
@@ -243,8 +267,7 @@ async def judge(submissionId: str, backgroundTasks: BackgroundTasks):
         # get problem info
         problem = json.loads(
             "".join(
-                open("./problems/" + submission["problem"] + "/" + submission["problem"] + ".json", "r", encoding="utf-8")
-                .readlines()
+                open("./problems/" + submission["problem"] + "/" + submission["problem"] + ".json", "r", encoding="utf-8").readlines()
             )
         )
         # get language info
@@ -275,7 +298,7 @@ async def judge(submissionId: str, backgroundTasks: BackgroundTasks):
             runCommand = [
                 elm if elm != 0
                 else "./submissions/" + submissionId + "/Main." + language["extension"]
-                    for elm in language["command"]
+                for elm in language["command"]
             ]
             judgeInfo.runCommand = runCommand
             judgeInfo.process = None
@@ -323,7 +346,11 @@ async def judge(submissionId: str, backgroundTasks: BackgroundTasks):
             )
         # if there is any judge such that has a verdict of "RJ", return "RJ"
         elif "RJ" in judges:
-            result = "RJ"
+            return json.dumps(
+                {
+                    "status": "RJ"
+                }
+            )
         else:
             # set judge status as "end"
             submission["judge"] = "end"
@@ -356,24 +383,24 @@ async def judge(submissionId: str, backgroundTasks: BackgroundTasks):
                 # update user's status
                 user = json.loads(
                     "".join(
-                        open("./status/status.json", "r", encoding="utf-8")
-                        .readlines()
+                        open("./status/status.json", "r", encoding="utf-8").readlines()
                     )
                 )
                 # get course info
-                course = json.loads(
+                courseInfo = json.loads(
                     "".join(
-                        open("./problems/meta.json", "r", encoding="utf-8")
-                        .readlines()
+                        open("./problems/meta.json", "r", encoding="utf-8").readlines()
                     )
                 )
-                course = [elm["course"] for elm in course if int(submission["problem"]) in elm["problems"]][0]
-                if not int(submission["problem"]) in user[course]:
-                    user[course].append(int(submission["problem"]))
+                courseInfo = \
+                    [elm["course"] for elm in courseInfo
+                        if int(submission["problem"]) in elm["problems"]][0]
+                if not int(submission["problem"]) in user[courseInfo]:
+                    user[courseInfo].append(int(submission["problem"]))
                 g = open("./status/status.json", "w", encoding="utf-8")
                 g.write(json.dumps(user))
                 g.close()
-            
+
             # set submission's verdict to result
             submission["verdict"] = result
 
@@ -384,21 +411,21 @@ async def judge(submissionId: str, backgroundTasks: BackgroundTasks):
 
             return json.dumps({"status": result})
 
+
 # search user
 @app.post("/searchUser", status_code=200, response_class=JSONResponse)
 def searchUser(user: User):
     users = json.loads(
         "".join(
-            open("./status/status.json", "r", encoding="utf-8")
-            .readlines()
+            open("./status/status.json", "r", encoding="utf-8").readlines()
         )
     )
-    users = [elm for elm in users if elm["username"] == user["username"]]
-    if len(user) == 0:
+    users = [elm for elm in users if elm["username"] == user.username]
+    if len(users) == 0:
         return json.dumps({"status": "not found"})
     else:
-        passAndSalt = user["password"] + users[0]["salt"]
-        if users[0]["password"] == hashlib.sha256(user["password"].encode("utf-8")).hexdigest():
+        passAndSalt = user.password + users[0]["salt"]
+        if users[0]["password"] == hashlib.sha256(passAndSalt.encode("utf-8")).hexdigest():
             return json.dumps({"status": "found", "user": users[0]})
         else:
             return json.dumps({"status": "invalid password"})
