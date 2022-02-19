@@ -60,8 +60,7 @@ class JudgeJob:
             capture_output=True,
             text=True,
             stdin=open(
-                "./problems/" + jobs[self.UUID].problem + "/" + jobs[self.UUID].testcaseName["input"], "r", encoding="utf-8"
-            ),
+                "./problems/" + jobs[self.UUID].problem + "/" + jobs[self.UUID].testcaseName["input"], "r", encoding="utf-8"),
         )
         # get status code
         statusCode = jobs[self.UUID].process.returncode
@@ -70,8 +69,7 @@ class JudgeJob:
             jobs[self.UUID].error = jobs[self.UUID].process.stderr
 
             outputFile = open(
-                "./problems/" + jobs[self.UUID].problem + "/" + jobs[self.UUID].testcaseName["output"], "r", encoding="utf-8"
-            )
+                "./problems/" + jobs[self.UUID].problem + "/" + jobs[self.UUID].testcaseName["output"], "r", encoding="utf-8")
             if jobs[self.UUID].output == outputFile.read():
                 jobs[self.UUID].status = "AC"
             else:
@@ -94,13 +92,6 @@ class User(BaseModel):
 @app.get("/", response_class=HTMLResponse, status_code=200)
 async def root():
     f = open("./static/front.html", "r", encoding="utf-8")
-    return f.read()
-
-
-# login page
-@app.get("/login", response_class=HTMLResponse, status_code=200)
-async def login():
-    f = open("./static/login.html", "r", encoding="utf-8")
     return f.read()
 
 

@@ -8,13 +8,6 @@
 
 <script>
     window.onload = async () => {
-        // check if user is logged in
-        if (
-            localStorage.getItem("userName") === null
-            || new Date(localStorage.getItem("expirationDate")) < new Date()) {
-            // redirect to login page
-            window.location.href = "/login";
-        }
         // get courses list
         const courses = await fetch(
             "/courses",
@@ -118,23 +111,12 @@
 
 <body>
     <header>
-        <table>
-            <tbody>
-                <tr>
-                    <td>
-                        <h1 onclick="location.href='/'">
-                            progino
-                        </h1>
-                        <p>
-                            study for "using".
-                        </p>
-                    </td>
-                    <td>
-                        <span id="userInfo"></span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <h1 onclick="location.href='/'">
+            progino
+        </h1>
+        <p>
+            study for "using".
+        </p>
     </header>
     <h2 id="courseTitle"></h2>
     <table>

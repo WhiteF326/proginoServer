@@ -57,22 +57,7 @@
         // user account information
         const userInfo = document.getElementById("userInfo");
         const userName = document.createElement("p");
-        // get user name from localStorage.userName
-        if(localStorage.getItem("userName") === null) {
-            userName.innerText = "Guest";
-        } else {
-            // check expiration date
-            const expirationDate
-                = new Date(localStorage.getItem("expirationDate"));
-            const now = new Date();
-            if(now > expirationDate) {
-                // remove user name from localStorage
-                localStorage.removeItem("userName");
-                userName.innerText = "Guest";
-            } else {
-                userName.innerText = localStorage.getItem("userName");
-            }
-        }
+        userName.innerText = "user name";
         userInfo.appendChild(userName);
     }
 </script>
