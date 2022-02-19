@@ -7,7 +7,7 @@ import uuid
 from threading import Timer
 from typing import Dict
 from typing import Optional
-from fastapi import BackgroundTasks, FastAPI
+from fastapi import BackgroundTasks, FastAPI, Form
 from fastapi.responses import HTMLResponse
 from fastapi.responses import JSONResponse
 from fastapi.responses import PlainTextResponse
@@ -99,9 +99,47 @@ async def root():
 
 # login page
 @app.get("/login", response_class=HTMLResponse, status_code=200)
-async def login():
+async def login(pastFailInfo: str = ""):
     f = open("./static/login.html", "r", encoding="utf-8")
-    return f.read()
+    s = f.read().split("\n")
+    f.close()
+    if pastFailInfo == "invalid password":
+        s.insert(
+            9,
+            "document.getElementById('failInfo').innerText = 'パスワードが異なります。再度お試しください。';",
+        )
+    elif pastFailInfo == "not found":
+        s.insert(
+            9,
+            "document.getElementById('failInfo').innerText = 'ユーザーが存在しません。';",
+        )
+    return "".join(s)
+
+
+# check login
+@app.post("/login/check", response_class=HTMLResponse, status_code=200)
+async def check_login(username: str = Form(...), password: str = Form(...)):
+    user = User(username=username, password=password)
+    searchResult = json.loads(searchUser(user))["status"]
+    if searchResult == "found":
+        session["loginId"] = username
+        # return json.dumps({"status": "OK"})
+        return open("./static/loginRedirection.html", "r", encoding="utf-8").read()
+    elif searchResult == "invalid password":
+        # return json.dumps({"status": "invalid password"})
+        return login("invalid password")
+    else:
+        # return json.dumps({"status": "Not found"})
+        return login("not found")
+
+
+# get login info
+@app.get("/login/info", response_class=JSONResponse, status_code=200)
+async def get_login_info():
+    if "loginId" in session:
+        return json.dumps({"status": "OK", "username": session["loginId"]})
+    else:
+        return json.dumps({"status": "Not found"})
 
 
 # course page
@@ -429,12 +467,11 @@ def searchUser(user: User):
             open("./status/status.json", "r", encoding="utf-8").readlines()
         )
     )
-    users = [elm for elm in users if elm["username"] == user.username]
-    if len(users) == 0:
+    if not user.username in users:
         return json.dumps({"status": "not found"})
     else:
-        passAndSalt = user.password + users[0]["salt"]
-        if users[0]["password"] == hashlib.sha256(passAndSalt.encode("utf-8")).hexdigest():
-            return json.dumps({"status": "found", "user": users[0]})
+        passAndSalt = user.password + users[user.username]["salt"]
+        if users[user.username]["password"] == hashlib.sha256(passAndSalt.encode("utf-8")).hexdigest():
+            return json.dumps({"status": "found", "user": users[user.username]})
         else:
             return json.dumps({"status": "invalid password"})

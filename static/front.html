@@ -73,7 +73,37 @@
                 userName.innerText = localStorage.getItem("userName");
             }
         }
-        userInfo.appendChild(userName);
+        // if user name is not Guest, create logout button
+        if(userName.innerText !== "Guest") {
+            const logoutButton = document.createElement("button");
+            logoutButton.innerText = "ログアウト";
+            logoutButton.onclick = () => {
+                // remove user name from localStorage
+                localStorage.removeItem("userName");
+                // redirect to login page
+                window.location.href = "/login";
+            };
+            userInfo.appendChild(userName);
+            userInfo.appendChild(logoutButton);
+        }
+        // if user name is Guest, create login and regiser button
+        else {
+            const loginButton = document.createElement("button");
+            loginButton.innerText = "ログイン";
+            loginButton.onclick = () => {
+                // redirect to login page
+                window.location.href = "/login";
+            };
+            const registerButton = document.createElement("button");
+            registerButton.innerText = "新規登録";
+            registerButton.onclick = () => {
+                // redirect to register page
+                window.location.href = "/register";
+            };
+            userInfo.appendChild(userName);
+            userInfo.appendChild(loginButton);
+            userInfo.appendChild(registerButton);
+        }
     }
 </script>
 

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head></head>
+<script>
+    window.onload = async () => {
+        // get user name from server session
+        const userName = JSON.parse(JSON.parse(
+            await (await fetch("/login/info", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })).text()
+        ))["username"];
+        // set user name to localStorage.userName
+        localStorage.setItem("userName", userName);
+        // set expiration date to localStorage.expirationDate
+        localStorage.setItem("expirationDate", new Date(
+            new Date().getTime() + 1000 * 60 * 60 * 24 * 7
+        ).toString());  // 1 week
+        // redirect to front page
+        window.location.href = "/";
+    }
+</script>
+
+<body></body>
+
+</html>
