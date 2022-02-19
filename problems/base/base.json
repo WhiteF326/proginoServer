@@ -1,0 +1,13 @@
+{
+  "title": "division",
+  "testcases": [
+    {
+      "input": "in/0.txt",
+      "output": "out/0.txt"
+    }
+  ],
+  "limits": {
+    "time": 2000,
+    "memory": 1048576
+  }
+}

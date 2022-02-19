@@ -1,0 +1,89 @@
+{
+  "title": "Squared Sum",
+  "testcases": [
+    {
+      "input": "in/0.txt",
+      "output": "out/0.txt"
+    },
+    {
+      "input": "in/1.txt",
+      "output": "out/1.txt"
+    },
+    {
+      "input": "in/2.txt",
+      "output": "out/2.txt"
+    },
+    {
+      "input": "in/3.txt",
+      "output": "out/3.txt"
+    },
+    {
+      "input": "in/4.txt",
+      "output": "out/4.txt"
+    },
+    {
+      "input": "in/5.txt",
+      "output": "out/5.txt"
+    },
+    {
+      "input": "in/6.txt",
+      "output": "out/6.txt"
+    },
+    {
+      "input": "in/7.txt",
+      "output": "out/7.txt"
+    },
+    {
+      "input": "in/8.txt",
+      "output": "out/8.txt"
+    },
+    {
+      "input": "in/9.txt",
+      "output": "out/9.txt"
+    },
+    {
+      "input": "in/10.txt",
+      "output": "out/10.txt"
+    },
+    {
+      "input": "in/11.txt",
+      "output": "out/11.txt"
+    },
+    {
+      "input": "in/12.txt",
+      "output": "out/12.txt"
+    },
+    {
+      "input": "in/13.txt",
+      "output": "out/13.txt"
+    },
+    {
+      "input": "in/14.txt",
+      "output": "out/14.txt"
+    },
+    {
+      "input": "in/15.txt",
+      "output": "out/15.txt"
+    },
+    {
+      "input": "in/16.txt",
+      "output": "out/16.txt"
+    },
+    {
+      "input": "in/17.txt",
+      "output": "out/17.txt"
+    },
+    {
+      "input": "in/18.txt",
+      "output": "out/18.txt"
+    },
+    {
+      "input": "in/19.txt",
+      "output": "out/19.txt"
+    }
+  ],
+  "limits": {
+    "time": 2000,
+    "memory": 1048576
+  }
+}

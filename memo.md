@@ -1,1 +1,5 @@
-- ユーザ情報は localStorage.userName と localStorage.expire
+## 起動コマンド
+
+```powershell
+uvicorn server:app --reload --reload-exclude Main.py
+```
