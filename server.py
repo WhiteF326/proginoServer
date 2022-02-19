@@ -11,11 +11,14 @@ from fastapi import BackgroundTasks, FastAPI, Form
 from fastapi.responses import HTMLResponse
 from fastapi.responses import JSONResponse
 from fastapi.responses import PlainTextResponse
+from fastapi.responses import RedirectResponse
 
 import json
 
 import markdown
 from pydantic import BaseModel
+from urllib.parse import unquote
+
 
 app = FastAPI()
 
@@ -98,19 +101,40 @@ async def root():
 
 
 # login page
-@app.get("/login", response_class=HTMLResponse, status_code=200)
+@app.get("/login/", response_class=HTMLResponse, status_code=200)
 async def login(pastFailInfo: str = ""):
     f = open("./static/login.html", "r", encoding="utf-8")
     s = f.read().split("\n")
     f.close()
+    # url decode
+    pastFailInfo = unquote(pastFailInfo)
     if pastFailInfo == "invalid password":
         s.insert(
-            9,
+            10,
             "document.getElementById('failInfo').innerText = 'パスワードが異なります。再度お試しください。';",
         )
     elif pastFailInfo == "not found":
         s.insert(
-            9,
+            10,
+            "document.getElementById('failInfo').innerText = 'ユーザーが存在しません。';",
+        )
+    return "".join(s)
+
+@app.post("/login/", response_class=HTMLResponse, status_code=200)
+async def login(pastFailInfo: str = ""):
+    f = open("./static/login.html", "r", encoding="utf-8")
+    s = f.read().split("\n")
+    f.close()
+    # url decode
+    pastFailInfo = unquote(pastFailInfo)
+    if pastFailInfo == "invalid password":
+        s.insert(
+            10,
+            "document.getElementById('failInfo').innerText = 'パスワードが異なります。再度お試しください。';",
+        )
+    elif pastFailInfo == "not found":
+        s.insert(
+            10,
             "document.getElementById('failInfo').innerText = 'ユーザーが存在しません。';",
         )
     return "".join(s)
@@ -127,10 +151,10 @@ async def check_login(username: str = Form(...), password: str = Form(...)):
         return open("./static/loginRedirection.html", "r", encoding="utf-8").read()
     elif searchResult == "invalid password":
         # return json.dumps({"status": "invalid password"})
-        return login("invalid password")
+        return RedirectResponse(url="/login?pastFailInfo=invalid password")
     else:
         # return json.dumps({"status": "Not found"})
-        return login("not found")
+        return RedirectResponse(url="/login?pastFailInfo=not found")
 
 
 # get login info
