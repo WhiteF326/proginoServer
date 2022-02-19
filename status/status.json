@@ -1,12 +1,1 @@
-{
-  "Shiroha_F14": {
-    "salt": "AE74CB041B5C0EBB",
-    "password": "7f1f71e8f6d165978908412a96d5d405b14d973970e24e4bbc59ea17e28658aa",
-    "email": "lume1a326.leno@gmail.com",
-    "newbie": [
-      1,
-      2,
-      3
-    ]
-  }
-}
+{"newbie": [1, 2, 3]}
